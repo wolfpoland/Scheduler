@@ -5,10 +5,7 @@ using System.Threading.Tasks;
 
 namespace Scheduler.Data
 {
-    public class Class1
+    public class SchedulerContext
     {
-        public Class1()
-        {
-        }
     }
 }

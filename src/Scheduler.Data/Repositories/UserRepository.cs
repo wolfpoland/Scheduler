@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Scheduler.Data
+namespace Scheduler.Data.Repositories
 {
-    public interface IEntityBase
+    public class UserRepository
     {
-        int Id { get; set; }
     }
 }
