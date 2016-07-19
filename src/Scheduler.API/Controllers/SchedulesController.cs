@@ -94,6 +94,7 @@ namespace Scheduler.API.Controllers
                 return NotFound();
             }
         }
+        [HttpPost]
         public IActionResult Create([FromBody]ScheduleViewModel schedule)
         {
             if (!ModelState.IsValid)
