@@ -35,7 +35,7 @@ namespace Scheduler.Data
             modelBuilder.Entity<Attendee>().ToTable("Attendee");
             modelBuilder.Entity<Attendee>().HasOne(a => a.User)
                 .WithMany(u => u.SchedulesAttended).HasForeignKey(a => a.UserId);
-            modelBuilder.Entity<Attendee>().HasOne(a => a.Schedule).WithMany(s => s.Attendees).HasForeignKey(a => a.Schedule);
+            modelBuilder.Entity<Attendee>().HasOne(a => a.Schedule).WithMany(s => s.Attendees).HasForeignKey(a => a.ScheduleId);
 
         }
     }

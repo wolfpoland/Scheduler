@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace Scheduler.Data.Repositories
 {
-    public class ScheduleRepository :EntityBaseRepository<Schedule>, IScheduleRepository
+    public class AttendeeRepository :EntityBaseRepository<Attendee>, IAttendeeRepository
     {
-        public ScheduleRepository(SchedulerContext context)
-            :base(context)
+        public AttendeeRepository(SchedulerContext context) :base(context)
         {
 
         }

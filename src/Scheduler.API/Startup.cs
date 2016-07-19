@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
-using Scheduler.Data;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Scheduler.Data;
+using Scheduler.Data.Repositories;
 using Scheduler.Data.Abstract;
+using System.Net;
+using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Scheduler.Data.Scheduler.Data;
 
 namespace Scheduler.API
 {
@@ -42,26 +43,59 @@ namespace Scheduler.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<SchedulerContext>(options =>
-            options.UseSqlServer(Configuration["Data:SchedulerConnection:ConneciotnString"],
-            b => b.MigrationsAssembly("Scheduler.API")));
+                  options.UseSqlServer(Configuration["Data:SchedulerConnection:ConnectionString"],
+                  b => b.MigrationsAssembly("Scheduler.API")));
 
             services.AddScoped<IScheduleRepository, ScheduleRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IAttendeeRepository, AttendeeRepository>();
+            services.AddCors();
+            services.AddMvc().AddJsonOptions(opts =>
+            {
+                opts.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
-            loggerFactory.AddConsole();
+            app.UseStaticFiles();
+            // Add MVC to the request pipeline.
+            app.UseCors(builder =>
+                builder.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod());
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseExceptionHandler(
+              builder =>
+              {
+                  builder.Run(
+                    async context =>
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
 
-            app.Run(async (context) =>
+                        var error = context.Features.Get<IExceptionHandlerFeature>();
+                        if (error != null)
+                        {
+                            //context.Response.AddApplicationError(error.Error.Message);
+                            await context.Response.WriteAsync(error.Error.Message).ConfigureAwait(false);
+                        }
+                    });
+              });
+
+            app.UseMvc(routes =>
             {
-                await context.Response.WriteAsync("Hello World!");
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+
+                // Uncomment the following line to add a route for porting Web API 2 controllers.
+                //routes.MapWebApiRoute("DefaultApi", "api/{controller}/{id?}");
             });
+
+            SchedulerDbInitializer.Initialize(app.ApplicationServices);
         }
     }
 }
+
