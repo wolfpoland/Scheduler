@@ -11,17 +11,18 @@ namespace Scheduler.API.ViewModels
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public string Desceiption { get; set; }
+        public string Description { get; set; }
         public DateTime TimeStart { get; set; }
         public DateTime TimeEnd { get; set; }
         public string Location { get; set; }
         public string Type { get; set; }
         public string Status { get; set; }
-        public DateTime DataCreated { get; set; }
-        public DateTime DataUpdate { get; set; }
+        public DateTime DateCreated { get; set; }
+        public DateTime DateUpdated { get; set; }
         public string Creator { get; set; }
         public int CreatorId { get; set; }
-        public int[] Attedndess { get; set; }
+        public int[] Attendees { get; set; }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             var validator = new ScheduleViewModelValidator();

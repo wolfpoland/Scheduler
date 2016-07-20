@@ -27,4 +27,5 @@ namespace Scheduler.Model.Entities
         public int CreatorId { get; set; }
         public ICollection<Attendee> Attendees { get; set; }
     }
+
 }

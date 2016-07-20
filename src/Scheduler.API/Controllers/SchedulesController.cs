@@ -124,13 +124,13 @@ namespace Scheduler.API.Controllers
             {
                 _scheduleDb.Title = schedule.Title;
                 _scheduleDb.Location = schedule.Location;
-                _scheduleDb.Description = schedule.Desceiption;
+                _scheduleDb.Description = schedule.Description;
                 _scheduleDb.Status = (ScheduleStatus)Enum.Parse(typeof(ScheduleStatus), schedule.Status);
                 _scheduleDb.Type = (ScheduleType)Enum.Parse(typeof(ScheduleType), schedule.Type);
                 _scheduleDb.TimeStart = schedule.TimeStart;
                 _scheduleDb.TimeEnd = schedule.TimeEnd;
                 _attendeeRepository.DeleteWhere(a => a.ScheduleId == id);
-                foreach (var item in schedule.Attedndess)
+                foreach (var item in schedule.Attendees)
                 {
                     _scheduleDb.Attendees.Add(new Attendee { ScheduleId = id, UserId = item });
                 }

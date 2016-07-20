@@ -12,6 +12,8 @@ using Newtonsoft.Json.Serialization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Scheduler.Data.Scheduler.Data;
+using Scheduler.API.Core;
+using Scheduler.API.ViewModels.Mappings;
 
 namespace Scheduler.API
 {
@@ -24,6 +26,8 @@ namespace Scheduler.API
         {
             _applicationPath = env.WebRootPath;
             _contentRootPath = env.ContentRootPath;
+            // Setup configuration sources.
+
             var builder = new ConfigurationBuilder()
                 .SetBasePath(_contentRootPath)
                 .AddJsonFile("appsettings.json")
@@ -31,29 +35,40 @@ namespace Scheduler.API
 
             if (env.IsDevelopment())
             {
+                // This reads the configuration keys from the secret store.
+                // For more details on using the user secret store see http://go.microsoft.com/fwlink/?LinkID=532709
                 builder.AddUserSecrets();
             }
+
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
         }
-
-        
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<SchedulerContext>(options =>
-                  options.UseSqlServer(Configuration["Data:SchedulerConnection:ConnectionString"],
-                  b => b.MigrationsAssembly("Scheduler.API")));
+                options.UseSqlServer(Configuration["Data:SchedulerConnection:ConnectionString"],
+                b => b.MigrationsAssembly("Scheduler.API")));
 
+            // Repositories
             services.AddScoped<IScheduleRepository, ScheduleRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IAttendeeRepository, AttendeeRepository>();
+
+            // Automapper Configuration
+            AutoMapperConfiguration.Configure();
+
+            // Enable Cors
             services.AddCors();
-            services.AddMvc().AddJsonOptions(opts =>
-            {
-                opts.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            });
+
+            // Add MVC services to the services container.
+            services.AddMvc()
+                .AddJsonOptions(opts =>
+                {
+                    // Force Camel Case to JSON
+                    opts.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -78,7 +93,7 @@ namespace Scheduler.API
                         var error = context.Features.Get<IExceptionHandlerFeature>();
                         if (error != null)
                         {
-                            //context.Response.AddApplicationError(error.Error.Message);
+                            context.Response.AddApplicationError(error.Error.Message);
                             await context.Response.WriteAsync(error.Error.Message).ConfigureAwait(false);
                         }
                     });
