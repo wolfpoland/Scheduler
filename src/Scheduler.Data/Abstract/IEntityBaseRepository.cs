@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Scheduler.Data.Abstract
 {
-    public interface IEntityBaseRepository<T> where T : class, IEntityBase, new()
+    public interface IEntityBaseRepository<T> where T : class, Model.IEntityBase, new()
     {
         IEnumerable<T> AllIncluding(params Expression<Func<T, object>>[] includeProperties);
         IEnumerable<T> GetAll();
